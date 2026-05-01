@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Pro - Dashboard</title>
+    <style>
+        :root { --primary: #2980b9; --success: #27ae60; --danger: #e74c3c; --warning: #f1c40f; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .date-text { color: #666; font-weight: bold; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card span { font-size: 0.8rem; color: #7f8c8d; display: block; margin-bottom: 5px; }
+        .card b { font-size: 1.2rem; color: #2c3e50; }
+        .profit-val { color: var(--success) !important; }
+
+        /* AI Suggestion Box */
+        .suggestion-box { background: #fff3cd; border-left: 5px solid var(--warning); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+
+        /* Action Buttons */
+        .action-btn { background: var(--primary); color: white; border: none; width: 100%; padding: 18px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
+        .btn-return { background: var(--danger); }
+        .btn-vendor { background: #34495e; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h2>Hardware Pro 🛠️</h2>
+    <div class="date-text" id="currentDate">1 May 2026</div>
+</div>
+
+<div class="stats-grid">
+    <div class="card">
+        <span>Aaj ki Sale</span>
+        <b id="todaySales">₹0.00</b>
+    </div>
+    <div class="card">
+        <span>Aaj ka Profit</span>
+        <b id="todayProfit" class="profit-val">₹0.00</b>
+    </div>
+    <div class="card">
+        <span>Mahine ki Income</span>
+        <b id="monthlyProfit">₹0.00</b>
+    </div>
+    <div class="card">
+        <span>Total Udhaar</span>
+        <b style="color: var(--danger);">₹0.00</b>
+    </div>
+</div>
+
+<div class="suggestion-box">
+    💡 <b>Smart Suggestion:</b> <span id="aiText">Stock data load ho raha hai...</span>
+</div>
+
+<button class="action-btn" onclick="location.href='/scanner'">🚀 Badi Billing (Scanner)</button>
+<button class="action-btn btn-vendor" onclick="location.href='/add-stock'">➕ Naya Maal (Add Stock)</button>
+<button class="action-btn btn-vendor" onclick="location.href='/add-vendor'">👤 Naya Dukandar</button>
+<button class="action-btn btn-return" onclick="location.href='/return'">🔄 Saaman Wapsi (Return)</button>
+
+<script>
+// dashboard.html ke script mein ye logic add karein
+function checkLowStock(products) {
+    let alerts = "";
+    products.forEach(p => {
+        if(p.currentStock <= p.lowStockLimit) {
+            alerts += `⚠️ <b>${p.productName}</b> kam hai (${p.currentStock} bache hain). <br>`;
+        }
+    });
+
+    if(alerts !== "") {
+        document.getElementById('aiText').innerHTML = alerts;
+        document.getElementById('aiText').parentElement.style.background = "#ffdce0"; // Red background for alert
+    } else {
+        document.getElementById('aiText').innerText = "Sab sahi chal raha hai! Stock full hai.";
+    }
+}
+        // Aaj ki date set karein
+        document.getElementById('currentDate').innerText = new Date().toDateString();
+
+        // Stats Load Karne ka Function
+        function loadStats() {
+            fetch('/api/inventory/stats/today')
+            .then(res => res.json())
+            .then(data => {
+                let sales = 0; let profit = 0;
+                data.forEach(t => {
+                    sales += t.totalAmount;
+                    profit += t.netProfit;
+                });
+                document.getElementById('todaySales').innerText = "₹" + sales.toFixed(2);
+                document.getElementById('todayProfit').innerText = "₹" + profit.toFixed(2);
+
+                // Demo AI Suggestion Logic
+                if(profit > 1000) {
+                    document.getElementById('aiText').innerText = "Bhai, aaj kaam solid chal raha hai! Lilu se aur stock mangwa lo.";
+                }
+            });
+        }
+        loadStats();
+    </script>
+</body>
+</html>

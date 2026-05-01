@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Item - Hardware Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #fff5f5; padding: 15px; margin: 0; }
+        .return-card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid #e74c3c; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #555; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-process { background: #e74c3c; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .info-text { font-size: 0.8rem; color: #666; margin-top: 10px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<h3>🔄 Saaman Wapsi (Return)</h3>
+
+<div class="return-card">
+    <div class="input-group">
+        <label>Product ID / Barcode (Scan or Type)</label>
+        <input type="text" id="rId" placeholder="Wapas aaya saaman scan karein">
+    </div>
+
+    <div class="input-group">
+        <label>Wapas aayi Quantity</label>
+        <input type="number" id="rQty" placeholder="Kitne piece wapas aaye?">
+    </div>
+
+    <div class="input-group">
+        <label>Customer ko kitne paise diye? (Refund)</label>
+        <input type="number" id="rRefund" placeholder="₹ Amount wapas diya">
+    </div>
+
+    <button class="btn-process" onclick="processReturn()">RETURN & ADJUST PROFIT</button>
+
+    <div class="info-text">
+        * Isse saaman automatically stock mein (+ plus) ho jayega aur aaj ke total profit mein se amount (- minus) ho jayega.
+    </div>
+</div>
+
+<script>
+        function processReturn() {
+            const id = document.getElementById('rId').value;
+            const qty = document.getElementById('rQty').value;
+            const refund = document.getElementById('rRefund').value;
+
+            if(!id || !qty || !refund) {
+                alert("Bhai, saari details bharo!");
+                return;
+            }
+
+            // Humne Response 4 mein jo API banayi thi, ye usey call karega
+            fetch(`/api/inventory/return?id=${id}&qty=${qty}&refund=${refund}`, {
+                method: 'POST'
+            })
+            .then(res => {
+                if(res.ok) {
+                    alert("Wapsi pakki! Stock badh gaya aur profit adjust ho gaya.");
+                    location.href = "/dashboard";
+                }
+            })
+            .catch(err => alert("Galti hui: " + err));
+        }
+    </script>
+</body>
+</html>

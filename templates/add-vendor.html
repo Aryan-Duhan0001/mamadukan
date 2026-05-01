@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vendor - Hardware Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 15px; margin: 0; }
+        .form-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .btn-save { background: #34495e; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+        .vendor-list-link { display: block; text-align: center; margin-top: 15px; color: #2980b9; text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<h3>Naya Dukandar (Vendor) Jodein 👤</h3>
+
+<div class="form-card">
+    <div class="input-group">
+        <label>Dukandar / Firm ka Naam</label>
+        <input type="text" id="vName" placeholder="E.g. Radhe Hardware or Lilu & Sons">
+    </div>
+
+    <div class="input-group">
+        <label>WhatsApp Number (With 91)</label>
+        <input type="number" id="vPhone" placeholder="E.g. 9198XXXXXXXX">
+    </div>
+
+    <div class="input-group">
+        <label>Kya Saman Dete Hain?</label>
+        <select id="vCategory">
+            <option value="Tools">Tools (Hathode, Plas)</option>
+            <option value="Paints">Paints & Chemicals</option>
+            <option value="Aluminium">Aluminium Sections</option>
+            <option value="Plumbing">Plumbing / Pipes</option>
+            <option value="Fasteners">Fasteners (Screws, Nails)</option>
+        </select>
+    </div>
+
+    <button class="btn-save" onclick="saveVendor()">SAVE DUKANDAR</button>
+    <a href="/dashboard" class="vendor-list-link">← Wapas Dashboard</a>
+</div>
+
+<script>
+        function saveVendor() {
+            const vendorData = {
+                vendorName: document.getElementById('vName').value,
+                contactNumber: document.getElementById('vPhone').value,
+                categoryProvided: document.getElementById('vCategory').value
+            };
+
+            // Backend API Call (Hum ise Response 9 mein banayenge)
+            fetch('/api/inventory/add-vendor', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(vendorData)
+            })
+            .then(res => {
+                if(res.ok) {
+                    alert("Dukandar " + vendorData.vendorName + " save ho gaya!");
+                    location.href = "/dashboard";
+                }
+            })
+            .catch(err => alert("Galti hui: " + err));
+        }
+    </script>
+</body>
+</html>

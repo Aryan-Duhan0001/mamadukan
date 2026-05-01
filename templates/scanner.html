@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Scanner - Billing</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+    <style>
+        body { font-family: sans-serif; margin: 0; background: #000; color: white; overflow: hidden; }
+        #video-container { position: relative; width: 100vw; height: 70vh; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        canvas { position: absolute; top: 0; left: 0; }
+
+        .bill-panel { height: 30vh; background: #fff; color: #333; padding: 15px; border-top-radius: 20px; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                 background: white; color: #333; padding: 20px; border-radius: 15px; width: 80%; z-index: 100; }
+        .btn-done { background: #27ae60; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div id="video-container">
+    <video id="webcam" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+</div>
+
+<div class="bill-panel">
+    <h3 style="margin:0">Total Bill: ₹<span id="billTotal">0</span></h3>
+    <p id="status">AI Dhoond raha hai...</p>
+    <button class="btn-done" onclick="finishBilling()">DONE & SEND WHATSAPP</button>
+</div>
+
+<div id="qtyModal" class="modal">
+    <h3 id="detectedItemName">Item</h3>
+    <input type="number" id="qtyInput" placeholder="Quantity" style="width:100%; padding:10px; font-size:1.2rem;">
+    <button onclick="addToBill()" style="width:100%; margin-top:10px; padding:10px; background:#2980b9; color:white; border:none;">ADD & NEXT</button>
+</div>
+
+<div class="bill-panel">
+    <h3 style="margin:0">Total Bill: ₹<span id="billTotal">0</span></h3>
+    <p>Ek click mein bill WhatsApp par share karein.</p>
+
+    <button class="btn-done" onclick="sendUniversalShare()">
+        🚀 SEND TO WHATSAPP (Search Contact)
+    </button>
+</div>
+
+<script>
+        let model;
+        let detectedItem = null;
+        const video = document.getElementById('webcam');
+
+        // 1. Load AI Model
+        async function setupAI() {
+            model = await cocoSsd.load();
+            startScanner();
+        }
+
+        // 2. Start Camera
+        async function startScanner() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            video.srcObject = stream;
+            predictFrame();
+        }
+
+        // 3. Detect Items
+        async function predictFrame() {
+            const predictions = await model.detect(video);
+            if (predictions.length > 0 && !document.getElementById('qtyModal').style.display.includes('block')) {
+                // Agar kuch dikha toh popup kholo
+                detectedItem = predictions[0].class; // E.g., 'bottle' or 'tool'
+                openQtyModal(detectedItem);
+            } else {
+                requestAnimationFrame(predictFrame);
+            }
+        }
+
+        function openQtyModal(name) {
+            document.getElementById('detectedItemName').innerText = "Pehchana: " + name;
+            document.getElementById('qtyModal').style.display = 'block';
+        }
+
+        function addToBill() {
+            // Logic: Bill mein add karo aur wapas scanner shuru karo
+            let q = document.getElementById('qtyInput').value;
+            console.log(`Added ${q} units of ${detectedItem}`);
+
+            // Auto-Loop: Modal band karo, scanner wapas shuru
+            document.getElementById('qtyModal').style.display = 'none';
+            document.getElementById('qtyInput').value = '';
+            predictFrame();
+        }
+
+        function finishBilling() {
+            alert("Bill Finalized! WhatsApp link opening...");
+            location.href = "/dashboard";
+        }
+
+        setupAI();
+    </script>
+</body>
+</html>

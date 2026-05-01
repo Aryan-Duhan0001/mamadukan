@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Stock - Hardware Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 15px; margin: 0; }
+        .scanner-window { width: 100%; height: 200px; background: #000; border-radius: 12px; margin-bottom: 15px; position: relative; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+
+        .form-card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+
+        .btn-save { background: #27ae60; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 1rem; }
+        .stock-preview { background: #e8f4fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<h3>Naya Maal Charhayein ➕</h3>
+
+<div class="scanner-window" id="scanner">
+    <video id="preview"></video>
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:white; border:2px solid lime; width:50%; height:40%;"></div>
+</div>
+
+<div class="form-card">
+    <div class="stock-preview" id="oldStockInfo" style="display:none;">
+        ⚠️ **Purana Stock:** <span id="prevQty">0</span> piece pehle se hain.
+    </div>
+
+    <div class="input-group">
+        <label>Product ID (Scan ya Type)</label>
+        <input type="text" id="pId" placeholder="Barcode Scan Karein" onchange="checkExistingProduct(this.value)">
+    </div>
+
+    <div class="input-group">
+        <label>Item ka Naam</label>
+        <input type="text" id="pName" placeholder="E.g. Asian Paint 1L">
+    </div>
+
+    <div class="input-group" style="display: flex; gap: 10px;">
+        <div style="flex:1">
+            <label>Khareed Rate</label>
+            <input type="number" id="pPurchase" placeholder="Cost Price">
+        </div>
+        <div style="flex:1">
+            <label>Bikri Rate</label>
+            <input type="number" id="pSale" placeholder="Selling Price">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Nayi Quantity (Jo dukan mein aayi)</label>
+        <input type="number" id="pQty" placeholder="Kitne piece aaye?">
+    </div>
+
+    <button class="btn-save" onclick="submitStock()">STOCK MEIN JODEIN</button>
+</div>
+
+<div class="input-group">
+    <label>⚠️ Low Stock Alert (Kitne piece par alert chahiye?)</label>
+    <input type="number" id="lowStockLimit" placeholder="E.g. 5">
+</div>
+
+<script>
+function submitStock() {
+    const productData = {
+        productName: document.getElementById('pName').value,
+        currentStock: parseInt(document.getElementById('pQty').value),
+        purchasePrice: parseFloat(document.getElementById('pPurchase').value),
+        sellingPrice: parseFloat(document.getElementById('pSelling').value),
+        lowStockLimit: parseInt(document.getElementById('lowStockLimit').value) || 0 // Yahan se data jayega
+    };
+
+    // Baaki Fetch wala code...
+}
+</script>
+
+<script>
+        // Scanner trigger (Simplified for structure)
+        async function startCamera() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            document.getElementById('preview').srcObject = stream;
+            document.getElementById('preview').play();
+        }
+
+        // Logic: Agar ID pehle se hai toh purani details dikhao
+        function checkExistingProduct(id) {
+            fetch(`/api/inventory/products/category/all`) // Real project mein ID se fetch hoga
+            .then(res => res.json())
+            .then(products => {
+                const p = products.find(item => item.id === id);
+                if(p) {
+                    document.getElementById('pName').value = p.productName;
+                    document.getElementById('pPurchase').value = p.purchasePrice;
+                    document.getElementById('pSale').value = p.sellingPrice;
+                    document.getElementById('oldStockInfo').style.display = 'block';
+                    document.getElementById('prevQty').innerText = p.currentStock;
+                }
+            });
+        }
+
+        function submitStock() {
+            const data = {
+                id: document.getElementById('pId').value,
+                productName: document.getElementById('pName').value,
+                currentStock: parseInt(document.getElementById('pQty').value), // Nayi Qty
+                purchasePrice: parseFloat(document.getElementById('pPurchase').value),
+                sellingPrice: parseFloat(document.getElementById('pSale').value)
+            };
+
+            fetch('/api/inventory/add-stock', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("Stock Merge Ho Gaya! (3 + 2 = 5)");
+                location.href = "/dashboard";
+            });
+        }
+
+        startCamera();
+    </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Sales - Hardware Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 15px; margin: 0; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+        .list-container { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #2980b9; color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #eee; }
+        .type-sale { color: #27ae60; font-weight: bold; }
+        .type-return { color: #e74c3c; font-weight: bold; }
+        .profit-text { font-weight: bold; color: #2c3e50; }
+        .summary-bar { background: #2c3e50; color: white; padding: 15px; border-radius: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h3>Aaj ki Bikri 📝</h3>
+    <button onclick="location.href='/dashboard'" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">Home</button>
+</div>
+
+<div class="list-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Total</th>
+            <th>Profit</th>
+        </tr>
+        </thead>
+        <tbody id="salesTable">
+        </tbody>
+    </table>
+</div>
+
+<div class="summary-bar">
+    <span>Total Net Profit (Aaj): </span>
+    <span id="finalProfit" style="font-size: 1.2rem; float: right;">₹0.00</span>
+</div>
+
+<script>
+        function loadSales() {
+            fetch('/api/inventory/stats/today')
+            .then(res => res.json())
+            .then(data => {
+                const table = document.getElementById('salesTable');
+                let totalProfit = 0;
+                table.innerHTML = "";
+
+                data.forEach(t => {
+                    totalProfit += t.netProfit;
+                    const row = `
+                        <tr>
+                            <td>
+                                ${t.productName} <br>
+                                <small class="${t.type === 'SALE' ? 'type-sale' : 'type-return'}">${t.type}</small>
+                            </td>
+                            <td>${t.quantity}</td>
+                            <td>₹${t.totalAmount}</td>
+                            <td class="profit-text">₹${t.netProfit.toFixed(2)}</td>
+                        </tr>
+                    `;
+                    table.innerHTML += row;
+                });
+                document.getElementById('finalProfit').innerText = "₹" + totalProfit.toFixed(2);
+            });
+        }
+        loadSales();
+    </script>
+</body>
+</html>
