@@ -6,7 +6,7 @@ import org.springframework.ui.Model;
 import com.hardware.pro.model.Product;
 import com.hardware.pro.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.web.servlet.ModelAndView;
 import java.util.List;
 import java.util.Map;
 
@@ -17,10 +17,13 @@ public class InventoryController {
     private InventoryService inventoryService;
 
     // 1. DASHBOARD (Direct localhost:8080/ par chalega)
-    @GetMapping("/dashboard")
-    public String index(Model model) {
-        // Aapka pichla working logic
-        return "dashboard";
+
+
+    @GetMapping("/")
+    public ModelAndView showDashboard() {
+        ModelAndView mav = new ModelAndView("dashboard");
+        System.out.println("DEBUG: Looking for dashboard.html in templates folder");
+        return mav;
     }
     @GetMapping("/add-stock")
     public String addproduct() {
