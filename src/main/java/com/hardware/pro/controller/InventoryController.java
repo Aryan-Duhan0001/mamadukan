@@ -17,7 +17,7 @@ public class InventoryController {
     private InventoryService inventoryService;
 
     // 1. DASHBOARD (Direct localhost:8080/ par chalega)
-    @GetMapping("/")
+    @GetMapping("/dashboard")
     public String index(Model model) {
         // Aapka pichla working logic
         return "dashboard";
